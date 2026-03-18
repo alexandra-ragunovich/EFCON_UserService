@@ -10,16 +10,19 @@ import java.util.Optional;
 
 @Component
 public class UserMapper {
+
     public UserEntity toEntity(UserRequest request){
+
         UserEntity userEntity=new UserEntity();
         userEntity.setEmail(request.getEmail());
         userEntity.setPassword(request.getPassword());
         userEntity.setUserName(request.getUserName());
         userEntity.setPhone(request.getPhone());
         userEntity.setAvatarUrl(request.getAvatarUrl());
-return userEntity;
+        return userEntity;
     }
     public UserResponse toResponse(UserEntity userEntity){
+
         UserResponse userResponse=new UserResponse();
         userResponse.setId(userEntity.getId());
         userResponse.setEmail(userEntity.getEmail());

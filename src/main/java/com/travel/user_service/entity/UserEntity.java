@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -18,6 +19,7 @@ import java.time.LocalDateTime;
 @Getter
 @Table(name=UserEntity.TABLE_NAME)
 public class UserEntity {
+
     public static final String TABLE_NAME="users";
     public static final String ID="id";
     public static final String EMAIL="email";
@@ -26,6 +28,7 @@ public class UserEntity {
     public static final String AVATAR_URL="avatar_url";
     public static final String REGISTERED_AT="registered_at";
     public static final String PHONE = "phone";
+    public static final String UPDATED_DATE="updated_date";
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -52,5 +55,9 @@ public class UserEntity {
     @CreationTimestamp
     @Column(name = REGISTERED_AT)
     private LocalDateTime registeredAt;
+
+    @UpdateTimestamp
+    @Column(name = UPDATED_DATE)
+    private LocalDateTime updatedDate;
 
 }

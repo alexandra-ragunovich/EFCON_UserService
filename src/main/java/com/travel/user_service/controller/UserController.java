@@ -14,23 +14,29 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
 public class UserController {
+
     private final UserService userService;
+
     @PostMapping("/register")
     public UserResponse register(@Valid @RequestBody UserRequest request){
     return userService.register(request);
     }
+
     @GetMapping("/{id}")
     public UserResponse getProfile(@PathVariable int id) {
         return userService.getUserProfile(id);
     }
+
     @PatchMapping("/{id}")
     public UserResponse updateProfile(@PathVariable int id, @Valid @RequestBody UserUpdateRequest request) {
         return userService.updateUserProfile(id, request);
     }
+
     @DeleteMapping("/{id}")
     public void deleteUser(@PathVariable int id) {
         userService.deleteUser(id);
     }
+
     @PostMapping("/login")
     public LoginResponse login(@Valid @RequestBody LoginRequest request) {
         return userService.login(request);
