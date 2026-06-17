@@ -1,8 +1,6 @@
 package com.travel.user_service.controller;
 
-import com.travel.user_service.dto.request.LoginRequest;
-import com.travel.user_service.dto.request.UserRequest;
-import com.travel.user_service.dto.request.UserUpdateRequest;
+import com.travel.user_service.dto.request.*;
 import com.travel.user_service.dto.responce.LoginResponse;
 import com.travel.user_service.dto.responce.UserResponse;
 import com.travel.user_service.service.UserService;
@@ -22,23 +20,34 @@ public class UserController {
     return userService.register(request);
     }
 
-    @GetMapping("/{id}")
-    public UserResponse getProfile(@PathVariable int id) {
-        return userService.getUserProfile(id);
+    @GetMapping("/me")
+    public UserResponse getProfile(@RequestHeader("X-User-Id") int userId) {
+        return userService.getUserProfile(userId);
     }
 
-    @PatchMapping("/{id}")
-    public UserResponse updateProfile(@PathVariable int id, @Valid @RequestBody UserUpdateRequest request) {
-        return userService.updateUserProfile(id, request);
+    @PatchMapping("/me")
+    public UserResponse updateProfile(@RequestHeader("X-User-Id") int userId, @Valid @RequestBody UserUpdateRequest request) {
+        return userService.updateUserProfile(userId, request);
     }
 
-    @DeleteMapping("/{id}")
-    public void deleteUser(@PathVariable int id) {
-        userService.deleteUser(id);
+
+    @DeleteMapping("/me")
+    public void deleteUser(@RequestHeader("X-User-Id") int userId) {
+        userService.deleteUser(userId);
     }
 
     @PostMapping("/login")
     public LoginResponse login(@Valid @RequestBody LoginRequest request) {
         return userService.login(request);
+    }
+
+    @PostMapping("/forgot-password")
+    public void forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
+        userService.processForgotPassword(request.getEmail());
+    }
+
+    @PostMapping("/reset-password")
+    public void resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
+        userService.resetPassword(request.getToken(), request.getNewPassword());
     }
 }

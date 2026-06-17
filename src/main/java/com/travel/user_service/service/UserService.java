@@ -5,14 +5,18 @@ import com.travel.user_service.dto.request.UserRequest;
 import com.travel.user_service.dto.request.UserUpdateRequest;
 import com.travel.user_service.dto.responce.LoginResponse;
 import com.travel.user_service.dto.responce.UserResponse;
+import com.travel.user_service.entity.PasswordResetTokenEntity;
 import com.travel.user_service.entity.UserEntity;
 import com.travel.user_service.jwt.JwtService;
 import com.travel.user_service.mappers.UserMapper;
+import com.travel.user_service.repository.PasswordResetTokenRepository;
 import com.travel.user_service.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import java.util.UUID;
+import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -23,6 +27,8 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private static final String INVALID_CREDENTIALS = "Неверный email или пароль";
+    private final PasswordResetTokenRepository tokenRepository;
+    private final EmailService emailService;
 
     @Transactional
     public UserResponse register(UserRequest request){
@@ -71,4 +77,34 @@ public class UserService {
         return userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Пользователь не найден"));
     }
+
+    @Transactional
+    public void processForgotPassword(String email) {
+        UserEntity user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Пользователь не найден"));
+        tokenRepository.deleteByUserId(user.getId());
+        String token = UUID.randomUUID().toString();
+        PasswordResetTokenEntity tokenEntity = new PasswordResetTokenEntity();
+        tokenEntity.setToken(token);
+        tokenEntity.setUser(user);
+        tokenEntity.setExpiryDate(LocalDateTime.now().plusHours(1));
+        tokenRepository.save(tokenEntity);
+        emailService.sendPasswordResetEmail(user.getEmail(), token);
+    }
+
+    @Transactional
+    public void resetPassword(String token, String newPassword) {
+        PasswordResetTokenEntity tokenEntity = tokenRepository.findByToken(token)
+                .orElseThrow(() -> new RuntimeException("Неверный токен сброса"));
+
+        if (tokenEntity.getExpiryDate().isBefore(LocalDateTime.now())) {
+            tokenRepository.delete(tokenEntity);
+            throw new RuntimeException("Срок действия ссылки истек");
+        }
+        UserEntity user = tokenEntity.getUser();
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+        tokenRepository.delete(tokenEntity);
+    }
+
 }

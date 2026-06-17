@@ -39,6 +39,10 @@ public class UserMapper {
         Optional.ofNullable(request.getPhone()).ifPresent(userEntity::setPhone);
         Optional.ofNullable(request.getAvatarUrl()).ifPresent(userEntity::setAvatarUrl);
 
+        if (request.getAvatarUrl() != null) {
+            userEntity.setAvatarUrl(request.getAvatarUrl());
+        }
+
     }
 
 }
